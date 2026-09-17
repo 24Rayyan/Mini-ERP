@@ -5,7 +5,7 @@
     <title>Laporan Keuangan - {{ $reportData['formatted_start_date'] }} s/d {{ $reportData['formatted_end_date'] }}</title>
     <style>
         @page {
-            margin: 25px 25px;
+            margin: 20px 25px;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #1e293b;
         }
@@ -49,15 +49,15 @@
             font-size: 10.5px;
             font-weight: bold;
             color: #0f172a;
-            margin: 10px 0 4px 0;
+            margin: 12px 0 6px 0;
             text-transform: uppercase;
             border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 2px;
+            padding-bottom: 3px;
         }
         .table-data {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .table-data th {
             background-color: #f1f5f9;
@@ -95,13 +95,24 @@
             font-weight: bold;
             margin-top: 2px;
         }
+        .coa-header-row {
+            background-color: #e2e8f0;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .coa-subtotal-row {
+            background-color: #f8fafc;
+            font-weight: bold;
+        }
         .text-success { color: #166534; }
         .text-danger { color: #991b1b; }
         .text-primary { color: #1e40af; }
         .text-warning { color: #854d0e; }
+        .text-muted { color: #64748b; }
         .text-end { text-align: right; }
         .text-center { text-align: center; }
         .text-start { text-align: left; }
+        .font-mono { font-family: monospace; }
         .total-row {
             font-weight: bold;
             background-color: #f8fafc;
@@ -184,91 +195,119 @@
         </tr>
     </table>
 
-    <!-- 2. Rekap Buka Invoicing -->
-    <div class="section-title">2. Rekapitulasi Performa Penerbitan & Penagihan Invoice</div>
+    <!-- Grouping Data Internal Blade untuk CoA -->
+    @php
+        $groupedLedger = collect($reportData['ledger_entries'])->groupBy(function($item) {
+            return '[' . ($item['category_code'] ?? '-') . '] ' . ($item['category_name'] ?? 'Lain-lain');
+        });
+    @endphp
+
+    <!-- 2. Rekapitulasi per Chart Of Accounts (Group By) -->
+    <div class="section-title">2. Rekapitulasi per Akun (Chart of Accounts)</div>
     <table class="table-data">
         <thead>
             <tr>
-                <th style="width: 35%;" class="text-start">Status Dokumen Invoice</th>
-                <th style="width: 15%;">Jumlah Dokumen</th>
-                <th style="width: 25%;" class="text-end">Total Nilai Tagihan (Rp)</th>
-                <th style="width: 25%;">Tingkat Kolektibilitas</th>
+                <th style="width: 50%;" class="text-start">Kode & Nama Akun (Chart of Account)</th>
+                <th style="width: 10%;">Jumlah Mutasi</th>
+                <th style="width: 20%;" class="text-end">Total Masuk (Rp)</th>
+                <th style="width: 20%;" class="text-end">Total Keluar (Rp)</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td class="text-start"><strong>PAID</strong> - Invoice Lunas Terbayar</td>
-                <td class="text-center">{{ $reportData['invoicing_summary']['paid_count'] }}</td>
-                <td class="text-end text-success"><strong>{{ number_format($reportData['invoicing_summary']['paid_amount'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>{{ $reportData['invoicing_summary']['collection_rate'] }}%</strong> (Tertagih)</td>
-            </tr>
-            <tr>
-                <td class="text-start"><strong>SENT</strong> - Invoice Terkirim (Piutang Menunggu Bayar)</td>
-                <td class="text-center">{{ $reportData['invoicing_summary']['sent_count'] }}</td>
-                <td class="text-end text-primary"><strong>{{ number_format($reportData['invoicing_summary']['sent_amount'], 0, ',', '.') }}</strong></td>
-                <td class="text-center">Piutang Berjalan</td>
-            </tr>
-            <tr>
-                <td class="text-start"><strong>DRAFT</strong> - Konsep Invoice (Belum Terbit)</td>
-                <td class="text-center">{{ $reportData['invoicing_summary']['draft_count'] }}</td>
-                <td class="text-end text-muted">{{ number_format($reportData['invoicing_summary']['draft_amount'], 0, ',', '.') }}</td>
-                <td class="text-center">Konsep Internal</td>
-            </tr>
+            @forelse($groupedLedger as $coaTitle => $entries)
+                @php
+                    $sumIn = $entries->sum('amount_in');
+                    $sumOut = $entries->sum('amount_out');
+                @endphp
+                <tr>
+                    <td class="text-start"><strong>{{ $coaTitle }}</strong></td>
+                    <td class="text-center">{{ $entries->count() }}</td>
+                    <td class="text-end text-success">{{ $sumIn > 0 ? number_format($sumIn, 0, ',', '.') : '-' }}</td>
+                    <td class="text-end text-danger">{{ $sumOut > 0 ? number_format($sumOut, 0, ',', '.') : '-' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4" class="text-center py-3 text-muted">Tidak ada rekapitulasi akun pada periode ini.</td>
+                </tr>
+            @endforelse
             <tr class="total-row">
-                <td class="text-start">TOTAL PENERBITAN INVOICE PERIODE INI</td>
-                <td class="text-center">{{ $reportData['invoicing_summary']['total_count'] }}</td>
-                <td class="text-end">{{ number_format($reportData['invoicing_summary']['total_amount'], 0, ',', '.') }}</td>
-                <td class="text-center">100%</td>
+                <td colspan="2" class="text-end">TOTAL KESELURUHAN REKAPITULASI:</td>
+                <td class="text-end text-success">Rp {{ number_format($reportData['total_income'], 0, ',', '.') }}</td>
+                <td class="text-end text-danger">Rp {{ number_format($reportData['total_expense'], 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- 3. Rincian Arus Transaksi (Transaction Ledger) -->
-    <div class="section-title">3. Rincian Buku Kas & Mutasi Transaksi (Transaction Ledger)</div>
+    <!-- 3. Rincian Buku Kas & Mutasi Transaksi dikategorikan per Chart of Account -->
+    <div class="section-title">3. Rincian Buku Kas & Mutasi Transaksi per Akun</div>
     <table class="table-data">
         <thead>
             <tr>
-                <th style="width: 10%;">TANGGAL</th>
-                <th style="width: 15%;">NO. REF</th>
-                <th style="width: 20%;" class="text-start">AKUN / KATEGORI</th>
-                <th style="width: 23%;" class="text-start">URAIAN / RELASI</th>
-                <th style="width: 10%;">METODE</th>
-                <th style="width: 11%;" class="text-end">MASUK (RP)</th>
-                <th style="width: 11%;" class="text-end">KELUAR (RP)</th>
+                <th style="width: 12%;">TANGGAL</th>
+                <th style="width: 18%;">NO. REF</th>
+                <th style="width: 32%;" class="text-start">URAIAN / RELASI</th>
+                <th style="width: 12%;">METODE</th>
+                <th style="width: 13%;" class="text-end">MASUK (RP)</th>
+                <th style="width: 13%;" class="text-end">KELUAR (RP)</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($reportData['ledger_entries'] as $item)
-            <tr>
-                <td class="text-center">{{ $item['formatted_date'] }}</td>
-                <td class="text-center font-mono" style="font-size: 7.5px;">{{ $item['reference_number'] }}</td>
-                <td class="text-start">[{{ $item['category_code'] }}] {{ $item['category_name'] }}</td>
-                <td class="text-start">
-                    {{ $item['description'] }}
-                    @if($item['party_name'] && $item['party_name'] !== '-')
-                        <span style="font-size: 7.5px; color: #64748b; display: block;">Relasi: {{ $item['party_name'] }}</span>
-                    @endif
-                </td>
-                <td class="text-center" style="font-size: 7.5px;">{{ $item['payment_method'] }}</td>
-                <td class="text-end text-success">
-                    {{ $item['amount_in'] > 0 ? number_format($item['amount_in'], 0, ',', '.') : '-' }}
-                </td>
-                <td class="text-end text-danger">
-                    {{ $item['amount_out'] > 0 ? number_format($item['amount_out'], 0, ',', '.') : '-' }}
-                </td>
-            </tr>
+            @forelse($groupedLedger as $coaTitle => $entries)
+                <!-- Group Header CoA -->
+                <tr class="coa-header-row">
+                    <td colspan="6" class="text-start" style="padding: 6px;">
+                        AKUN: {{ $coaTitle }}
+                    </td>
+                </tr>
+
+                @foreach($entries as $item)
+                <tr>
+                    <td class="text-center">{{ $item['formatted_date'] }}</td>
+                    <td class="text-center font-mono" style="font-size: 7.5px;">{{ $item['reference_number'] }}</td>
+                    <td class="text-start">
+                        {{ $item['description'] }}
+                        @if($item['party_name'] && $item['party_name'] !== '-')
+                            <span style="font-size: 7.5px; color: #64748b; display: block;">Relasi: {{ $item['party_name'] }}</span>
+                        @endif
+                    </td>
+                    <td class="text-center" style="font-size: 7.5px;">{{ $item['payment_method'] }}</td>
+                    <td class="text-end text-success">
+                        {{ $item['amount_in'] > 0 ? number_format($item['amount_in'], 0, ',', '.') : '-' }}
+                    </td>
+                    <td class="text-end text-danger">
+                        {{ $item['amount_out'] > 0 ? number_format($item['amount_out'], 0, ',', '.') : '-' }}
+                    </td>
+                </tr>
+                @endforeach
+
+                <!-- Subtotal per CoA -->
+                @php
+                    $subtotalIn = $entries->sum('amount_in');
+                    $subtotalOut = $entries->sum('amount_out');
+                @endphp
+                <tr class="coa-subtotal-row">
+                    <td colspan="4" class="text-end" style="font-size: 8px;">SUBTOTAL {{ $coaTitle }}:</td>
+                    <td class="text-end text-success" style="font-size: 8px;">
+                        {{ $subtotalIn > 0 ? 'Rp ' . number_format($subtotalIn, 0, ',', '.') : '-' }}
+                    </td>
+                    <td class="text-end text-danger" style="font-size: 8px;">
+                        {{ $subtotalOut > 0 ? 'Rp ' . number_format($subtotalOut, 0, ',', '.') : '-' }}
+                    </td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="7" class="text-center py-3 text-muted">Tidak ada transaksi tercatat pada rentang tanggal ini.</td>
-            </tr>
+                <tr>
+                    <td colspan="6" class="text-center py-3 text-muted">Tidak ada transaksi tercatat pada rentang tanggal ini.</td>
+                </tr>
             @endforelse
-            <tr class="total-row">
-                <td colspan="5" class="text-end">TOTAL MUTASI ARUS KAS:</td>
+
+            <!-- Total Akhir Mutasi -->
+            <tr class="total-row" style="border-top: 2px solid #0f172a;">
+                <td colspan="4" class="text-end">TOTAL MUTASI ARUS KAS:</td>
                 <td class="text-end text-success">Rp {{ number_format($reportData['total_income'], 0, ',', '.') }}</td>
                 <td class="text-end text-danger">Rp {{ number_format($reportData['total_expense'], 0, ',', '.') }}</td>
             </tr>
             <tr style="background-color: #0f172a; color: #ffffff; font-weight: bold;">
-                <td colspan="5" class="text-end">SALDO SURPLUS / DEFISIT BERSIH (NET CASHFLOW):</td>
+                <td colspan="4" class="text-end">SALDO SURPLUS / DEFISIT BERSIH (NET CASHFLOW):</td>
                 <td colspan="2" class="text-end" style="color: #ffffff; font-size: 10px;">
                     Rp {{ number_format($reportData['net_profit'], 0, ',', '.') }}
                 </td>

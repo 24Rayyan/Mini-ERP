@@ -33,9 +33,9 @@
             <button type="button" class="btn btn-sm btn-outline-light rounded-3" id="btnClearSelection">
                 Batal Pilih
             </button>
-            <button type="button" class="btn btn-sm btn-success rounded-3 fw-bold px-3 d-inline-flex align-items-center gap-2 shadow-sm" id="btnOpenCoretaxModal">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Export Coretax DJP (.xlsx)</span>
+            <button type="button" class="btn btn-sm btn-primary rounded-3 fw-bold px-3 d-inline-flex align-items-center gap-2 shadow-sm" id="btnOpenCoretaxModal">
+                <i class="fa-solid fa-file-code"></i>
+                <span>Export Coretax DJP (XML / Excel)</span>
             </button>
         </div>
     </div>
@@ -45,27 +45,69 @@
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
     <div class="card-body p-4">
         
-        <!-- TOOLBAR: FILTER BULAN & SEARCH -->
-        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
-            <form action="{{ route('documents.index') }}" method="GET" class="d-flex align-items-center gap-2">
-                <div class="input-group input-group-sm filter-month-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="fa-regular fa-calendar-days"></i>
-                    </span>
-                    <select name="period" class="form-select form-select-sm border-start-0 fw-semibold text-dark" style="cursor: pointer;" onchange="this.form.submit()">
-                        <option value="">Semua Periode / Bulan</option>
+        <!-- TOOLBAR: FILTER BULAN & STATUS -->
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 p-3 bg-light rounded-4 border border-light-subtle">
+            <form action="{{ route('documents.index') }}" method="GET" class="d-flex align-items-center gap-2 flex-wrap m-0" id="filterForm">
+                
+                <!-- HIDDEN INPUT UNTUK MENJAGA STATE DOUBLE FILTER -->
+                <input type="hidden" name="period" id="inputPeriod" value="{{ request('period') }}">
+                <input type="hidden" name="status" id="inputStatus" value="{{ request('status') }}">
+
+                <!-- Filter Periode Dropdown Custom -->
+                <div class="dropdown">
+                    <button class="btn btn-white btn-sm border bg-white rounded-3 dropdown-toggle fw-semibold text-dark shadow-sm d-flex align-items-center gap-2 px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-calendar-days text-primary"></i>
+                        <span>
+                            @if(request('period'))
+                                {{ optional($availableMonths->firstWhere('value', request('period')))->label ?? request('period') }}
+                            @else
+                                Semua Periode
+                            @endif
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu shadow-lg border-0 rounded-3 mt-1 py-2" style="max-height: 280px; overflow-y: auto;">
+                        <li>
+                            <button class="dropdown-item d-flex align-items-center justify-content-between py-2 px-3 {{ !request('period') ? 'active fw-bold' : '' }}" type="button" onclick="setFilter('period', '')">
+                                <span>Semua Periode</span>
+                                @if(!request('period')) <i class="fa-solid fa-check small ms-2"></i> @endif
+                            </button>
+                        </li>
+                        <li><hr class="dropdown-divider opacity-50"></li>
                         @foreach($availableMonths as $item)
-                            <option value="{{ $item->value }}" {{ request('period') == $item->value ? 'selected' : '' }}>
-                                {{ $item->label }}
-                            </option>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center justify-content-between py-2 px-3 {{ request('period') == $item->value ? 'active fw-bold' : '' }}" type="button" onclick="setFilter('period', '{{ $item->value }}')">
+                                    <span>{{ $item->label }}</span>
+                                    @if(request('period') == $item->value) <i class="fa-solid fa-check small ms-2"></i> @endif
+                                </button>
+                            </li>
                         @endforeach
-                    </select>
+                    </ul>
                 </div>
-                @if(request('period'))
-                    <a href="{{ route('documents.index') }}" class="btn btn-sm btn-light text-secondary rounded-3 border" data-bs-toggle="tooltip" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
+
+                <!-- Filter Status Badge Chips -->
+                <div class="d-flex align-items-center bg-white p-1 rounded-3 border shadow-sm">
+                    <button type="button" onclick="setFilter('status', '')" class="btn btn-sm rounded-2 py-1 px-2.5 border-0 fw-semibold transition-all {{ !request('status') ? 'btn-primary text-white shadow-sm' : 'text-secondary hover-bg-light' }}">
+                        Semua
+                    </button>
+                    <button type="button" onclick="setFilter('status', 'DRAFT')" class="btn btn-sm rounded-2 py-1 px-2.5 border-0 fw-semibold transition-all {{ request('status') == 'DRAFT' ? 'btn-warning text-dark shadow-sm' : 'text-secondary hover-bg-light' }}">
+                        DRAFT
+                    </button>
+                    <button type="button" onclick="setFilter('status', 'SENT')" class="btn btn-sm rounded-2 py-1 px-2.5 border-0 fw-semibold transition-all {{ request('status') == 'SENT' ? 'btn-info text-white shadow-sm' : 'text-secondary hover-bg-light' }}">
+                        SENT
+                    </button>
+                    <button type="button" onclick="setFilter('status', 'PAID')" class="btn btn-sm rounded-2 py-1 px-2.5 border-0 fw-semibold transition-all {{ request('status') == 'PAID' ? 'btn-success text-white shadow-sm' : 'text-secondary hover-bg-light' }}">
+                        PAID
+                    </button>
+                </div>
+
+                <!-- Reset Button -->
+                @if(request('period') || request('status'))
+                    <a href="{{ route('documents.index') }}" class="btn btn-sm btn-danger-subtle text-danger border border-danger-subtle fw-semibold d-flex align-items-center gap-1.5 ms-md-1 px-2.5 py-1.5 rounded-3" data-bs-toggle="tooltip" title="Bersihkan Filter">
+                        <i class="fa-solid fa-xmark"></i>
+                        <span class="small">Reset</span>
                     </a>
                 @endif
+
             </form>
         </div>
 
@@ -85,7 +127,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($documents as $doc)
+                    @forelse($documents as $doc)
+                    @php
+                        $rowGross = $doc->items ? $doc->items->sum('subtotal') : 0;
+                        $rowDiscount = $doc->discount ?? 0;
+                        $rowDpp = max(0, $rowGross - $rowDiscount);
+                        $rowRawTrx = $doc->tax_transaction_code ?? $doc->customer?->default_tax_transaction_code ?? '040';
+                        $rowTrxCode = !empty($rowRawTrx) ? substr(preg_replace('/[^0-9]/', '', $rowRawTrx), 0, 2) : '04';
+                        $rowOtherTaxBase = ($rowTrxCode === '04') ? round(($rowDpp * 11) / 12, 2) : $rowDpp;
+                        $rowTaxRate = ($setting->enable_tax ?? true) ? ($setting->default_tax_rate ?? 11) : 0;
+                        $rowPpn = ($rowTrxCode === '04') ? round($rowOtherTaxBase * ($rowTaxRate / 100), 2) : round($rowDpp * ($rowTaxRate / 100), 2);
+                    @endphp
                     <tr>
                         <!-- Checkbox Bulk Export (Invoice Only) -->
                         <td class="text-center">
@@ -94,9 +146,11 @@
                                        value="{{ $doc->id }}" 
                                        data-docnum="{{ $doc->document_number }}"
                                        data-customer="{{ $doc->customer->name ?? '-' }}"
-                                       data-subtotal="{{ (float) $doc->subtotal }}"
-                                       data-tax="{{ (float) $doc->tax_amount }}"
-                                       data-total="{{ (float) $doc->total_amount }}"
+                                       data-subtotal="{{ (float) ($rowTrxCode === '04' ? $rowOtherTaxBase : $rowDpp) }}"
+                                       data-dpp="{{ (float) $rowDpp }}"
+                                       data-other-tax-base="{{ (float) $rowOtherTaxBase }}"
+                                       data-tax="{{ (float) $rowPpn }}"
+                                       data-total="{{ (float) ($rowDpp + $rowPpn) }}"
                                        data-has-tax-id="{{ (!empty($doc->customer->tax_id_number) || !empty($doc->customer->npwp)) ? '1' : '0' }}">
                             @else
                                 <span class="text-muted small" title="Hanya INVOICE yang dapat diekspor ke Coretax">-</span>
@@ -185,7 +239,9 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    {{-- Dikosongkan agar DataTables tidak error. Pesan empty state dihandle oleh opsi language.emptyTable di JS --}}
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -200,11 +256,11 @@
                 @csrf
                 <div class="modal-header border-0 pb-0 pt-4 px-4">
                     <div>
-                        <div class="badge bg-success-subtle text-success fw-bold px-2.5 py-1.5 rounded-pill mb-1 small">
-                            <i class="fa-solid fa-file-excel me-1"></i> Coretax DJP Ready
+                        <div class="badge bg-primary-subtle text-primary fw-bold px-2.5 py-1.5 rounded-pill mb-1 small">
+                            <i class="fa-solid fa-code me-1"></i> Coretax DJP v1.6.1 Ready
                         </div>
                         <h5 class="modal-title fw-bold text-dark" id="coretaxExportModalLabel">Export Faktur Pajak Keluaran (FK)</h5>
-                        <p class="text-muted small mb-0">File XLSX multi-sheet sesuai format resmi Coretax DJP (NPWP 16 Digit & NITKU 22 Digit).</p>
+                        <p class="text-muted small mb-0">File XML resmi (TaxInvoiceBulk v1.6.1) atau Spreadsheet Excel multi-sheet (NPWP 16 Digit & NITKU 22 Digit).</p>
                     </div>
                     <button type="button" class="btn-close align-self-start" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -262,12 +318,18 @@
                     <!-- Selected IDs Hidden Container -->
                     <div id="modalHiddenIds"></div>
                 </div>
-                <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-between">
+                <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-between gap-2 flex-wrap">
                     <button type="button" class="btn btn-light rounded-3 px-3 fw-semibold" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
-                        <i class="fa-solid fa-file-excel fs-6"></i>
-                        <span>Download Template Excel Coretax (.xlsx)</span>
-                    </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="submit" name="export_type" value="xlsx" class="btn btn-outline-success rounded-3 px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-file-excel fs-6"></i>
+                            <span>Excel (.xlsx)</span>
+                        </button>
+                        <button type="submit" name="export_type" value="xml" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-file-code fs-6"></i>
+                            <span>Download XML Coretax (v1.6.1)</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -299,19 +361,6 @@
         padding: 0.875rem 0.75rem;
         border-bottom: 1px solid #f1f5f9;
         font-size: 0.875rem;
-    }
-
-    /* Filter Month Component */
-    .filter-month-group {
-        min-width: 220px;
-    }
-    .filter-month-group .input-group-text,
-    .filter-month-group select {
-        border-color: #cbd5e1;
-    }
-    .filter-month-group select:focus {
-        border-color: #3b82f6;
-        box-shadow: none;
     }
 
     /* Type Badges */
@@ -420,6 +469,15 @@
 </style>
 
 <script>
+    function setFilter(type, value) {
+        if (type === 'period') {
+            document.getElementById('inputPeriod').value = value;
+        } else if (type === 'status') {
+            document.getElementById('inputStatus').value = value;
+        }
+        document.getElementById('filterForm').submit();
+    }
+
     function updateSelectColor(elem) {
         let val = $(elem).val();
         $(elem).removeClass('status-draft status-sent status-paid');
@@ -432,25 +490,54 @@
         }
     }
 
-    $(document).ready(function() {
-        // Initialize Bootstrap Tooltips
+    function initTooltips() {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    }
 
+    $(document).ready(function() {
+        // ==========================================
+        // POP UP ERROR JIKA DATA FILTER KOSONG
+        // ==========================================
+        @if($documents->isEmpty() && (request('period') || request('status')))
+            Swal.fire({
+                icon: 'info',
+                title: 'Data Tidak Ditemukan',
+                text: 'Tidak ada dokumen yang sesuai dengan filter Periode/Status yang Anda pilih.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#0d6efd',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            });
+        @endif
+
+        // Init Bootstrap Tooltips & Select Colors pada load awal
+        initTooltips();
         $('.status-select').each(function() {
             updateSelectColor(this);
         });
 
-        // Bulk Action & Coretax Export Handler
+        // Initialize DataTables
+        // Menambahkan emptyTable agar pesan di dalam tabel tetap muncul tanpa memicu error column count
         const dataTable = $('#myTable').DataTable({
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
+                emptyTable: "Tidak ada dokumen yang ditemukan untuk periode/status ini."
             },
             columnDefs: [
                 { orderable: false, targets: [0, 4, 5, 6] }
             ]
+        });
+
+        // Re-initialize Tooltips & Select Colors ketika DataTables me-render ulang halaman
+        dataTable.on('draw.dt', function () {
+            initTooltips();
+            $('.status-select').each(function() {
+                updateSelectColor(this);
+            });
         });
 
         function formatRupiah(number) {
@@ -458,7 +545,7 @@
         }
 
         function updateBulkBar() {
-            let checkedBoxes = $('.doc-checkbox:checked');
+            let checkedBoxes = dataTable.$('.doc-checkbox:checked');
             let count = checkedBoxes.length;
 
             if (count > 0) {
@@ -470,17 +557,17 @@
             }
         }
 
-        // Select All handler
+        // Select All handler (Melintasi seluruh halaman DataTables)
         $('#selectAllDocs').on('change', function() {
             let isChecked = $(this).is(':checked');
-            $('.doc-checkbox').prop('checked', isChecked);
+            dataTable.$('.doc-checkbox').prop('checked', isChecked);
             updateBulkBar();
         });
 
-        // Individual checkbox handler
-        $(document).on('change', '.doc-checkbox', function() {
-            let totalCheckboxes = $('.doc-checkbox').length;
-            let checkedCount = $('.doc-checkbox:checked').length;
+        // Individual checkbox handler (Event Delegation)
+        $('#myTable tbody').on('change', '.doc-checkbox', function() {
+            let totalCheckboxes = dataTable.$('.doc-checkbox').length;
+            let checkedCount = dataTable.$('.doc-checkbox:checked').length;
             
             $('#selectAllDocs').prop('checked', totalCheckboxes > 0 && totalCheckboxes === checkedCount);
             updateBulkBar();
@@ -488,14 +575,14 @@
 
         // Clear selection handler
         $('#btnClearSelection').on('click', function() {
-            $('.doc-checkbox').prop('checked', false);
+            dataTable.$('.doc-checkbox').prop('checked', false);
             $('#selectAllDocs').prop('checked', false);
             updateBulkBar();
         });
 
         // Open Coretax Modal & calculate summary
         $('#btnOpenCoretaxModal').on('click', function() {
-            let checkedBoxes = $('.doc-checkbox:checked');
+            let checkedBoxes = dataTable.$('.doc-checkbox:checked');
             let count = checkedBoxes.length;
 
             if (count === 0) {
@@ -539,12 +626,13 @@
                 $('#modalTaxIdWarning').addClass('d-none');
             }
 
-            let modal = new bootstrap.Modal(document.getElementById('coretaxExportModal'));
+            let modalEl = document.getElementById('coretaxExportModal');
+            let modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
             modal.show();
         });
 
-        // Quick status update AJAX
-        $(document).on('change', '.status-select', function() {
+        // Quick status update AJAX (Event Delegation)
+        $('#myTable tbody').on('change', '.status-select', function() {
             let docId = $(this).data('id');
             let newStatus = $(this).val();
             let selectElem = this;
@@ -582,7 +670,8 @@
             });
         });
 
-        $('.btn-delete').on('click', function(e) {
+        // Event Delegation untuk Tombol Hapus (Preserve Event saat Pindah Halaman DataTables)
+        $(document).on('click', '.btn-delete', function(e) {
             e.preventDefault();
             let form = $(this).closest('form');
             

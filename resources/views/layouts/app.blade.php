@@ -282,7 +282,6 @@
                 <div class="d-flex flex-column">
                     <span class="brand-text">{{ Str::limit($globalSetting->company_name ?? 'Mini ERP', 25) }}</span>
                 </div>
-                <span class="brand-badge ms-1">PRO</span>
             </a>
 
             <!-- Mobile Toggle -->
@@ -362,7 +361,7 @@
                         <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" style="background-color: #0b1329; border-radius: 12px; min-width: 280px; border: 1px solid rgba(255,255,255,0.08);">
                             <li>
                                 <a class="dropdown-item py-2 {{ request()->routeIs('reports.financial_statement*') ? 'active bg-primary' : '' }}" href="{{ route('reports.financial_statement') }}">
-                                    <i class="fa-solid fa-file-contract me-2 text-info"></i> Laporan Keuangan Profesional
+                                    <i class="fa-solid fa-file-contract me-2 text-info"></i> Laporan Keuangan
                                 </a>
                             </li>
                             <li>
@@ -370,11 +369,11 @@
                                     <i class="fa-solid fa-scale-balanced me-2 text-primary"></i> Laba Rugi Komersial & Fiskal
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a class="dropdown-item py-2 {{ request()->routeIs('reports.entertainment_nominative*') ? 'active bg-primary' : '' }}" href="{{ route('reports.entertainment_nominative') }}">
                                     <i class="fa-solid fa-champagne-glasses me-2 text-warning"></i> Lampiran Nominatif DJP
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </li>
 
@@ -387,12 +386,12 @@
                 </ul>
 
                 <!-- Live Status & Quick Details Widget -->
-                <div class="d-none d-lg-flex align-items-center gap-2">
+                {{-- <div class="d-none d-lg-flex align-items-center gap-2">
                     <div class="d-flex align-items-center bg-white bg-opacity-10 py-1.5 px-3 rounded-pill border border-white border-opacity-10 text-white font-xs" style="font-size: 0.775rem;">
                         <span class="pulse-dot me-2"></span>
                         <span class="fw-semibold">{{ $globalSetting->currency_code ?? 'IDR' }} (PPN {{ $globalSetting->default_tax_rate ?? 11 }}%)</span>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </nav>

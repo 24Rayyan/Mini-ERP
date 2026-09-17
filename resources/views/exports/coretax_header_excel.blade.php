@@ -27,9 +27,18 @@
                 // Kalkulasi Finansial
                 $bruto = $doc->items->sum('subtotal');
                 $potongan = $doc->discount ?? 0;
-                $dpp = $bruto - $potongan;
+                $dpp = max(0, $bruto - $potongan);
+                // Prioritas Kode FP: (1) Detail Customer, (2) Kode di Dokumen, (3) Default 040
+                $customerFpCode = $doc->customer?->default_tax_transaction_code ?? null;
+                $rawTrxCode = (!empty($customerFpCode)) ? $customerFpCode : ($doc->tax_transaction_code ?? '040');
+                if (empty($rawTrxCode)) $rawTrxCode = '040';
+                $trxCode = substr(preg_replace('/[^0-9]/', '', $rawTrxCode), 0, 2);
+                if (empty($trxCode)) $trxCode = '04';
+                $otherTaxBase = ($trxCode === '04') ? round(($dpp * 11) / 12, 2) : $dpp;
                 $taxRatePercent = ($setting->enable_tax ?? true) ? ($setting->default_tax_rate ?? 11) : 0;
-                $ppn = $dpp * ($taxRatePercent / 100);
+                $ppn = ($trxCode === '04') ? round($otherTaxBase * ($taxRatePercent / 100), 2) : round($dpp * ($taxRatePercent / 100), 2);
+                // Kode FP 3 digit untuk output kolom (e.g. '040', '020')
+                $fpCodeOutput = str_pad($trxCode, 3, '0', STR_PAD_RIGHT);
 
                 // ID Type Mapping for Coretax DJP
                 $idType = 'TIN';
@@ -52,7 +61,7 @@
                 $buyerNitku = preg_replace('/[^0-9]/', '', $doc->customer?->nitku ?? '0000000000000000000000');
             @endphp
             <tr>
-                <td style="mso-number-format:'\@';">{{ $doc->tax_transaction_code ?? $doc->customer?->default_tax_transaction_code ?? '040' }}</td>
+                <td style="mso-number-format:'\@';">{{ $fpCodeOutput }}</td>
                 <td style="mso-number-format:'\@';">{{ $doc->document_number }}</td>
                 <td>{{ $taxDate }}</td>
                 <td style="mso-number-format:'\@';">{{ str_pad($sellerNpwp, 16, '0', STR_PAD_LEFT) }}</td>
@@ -64,7 +73,7 @@
                 <td style="mso-number-format:'\@';">{{ str_pad($buyerNitku, 22, '0', STR_PAD_LEFT) }}</td>
                 <td>{{ $doc->customer?->name }}</td>
                 <td>{{ $doc->customer?->address ?? '-' }}</td>
-                <td>{{ $dpp }}</td>
+                <td>{{ $trxCode === '04' ? $otherTaxBase : $dpp }}</td>
                 <td>{{ $ppn }}</td>
                 <td>0</td>
                 <td>{{ $doc->payment_note ?? 'Invoice Ref: ' . $doc->document_number }}</td>

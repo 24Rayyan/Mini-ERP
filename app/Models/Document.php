@@ -11,12 +11,23 @@ class Document extends Model
         'type',
         'document_number',
         'date',
+        'due_date',
         'status',
+        'subtotal',
+        'tax_percent',
+        'tax_amount',
         'total_amount',
         'discount',
+        'discount_amount',
         'tax_transaction_code',
         'tax_invoice_date',
         'payment_note',
+    ];
+
+    protected $casts = [
+        'date'             => 'date',
+        'due_date'         => 'date',
+        'tax_invoice_date' => 'date',
     ];
 
     // Relasi: 1 Document punya banyak DocumentItem

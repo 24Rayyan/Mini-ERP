@@ -3,9 +3,10 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class CoretaxFkExport implements WithMultipleSheets
+class CoretaxFkExport implements Export, WithMultipleSheets
 {
     use Exportable;
 

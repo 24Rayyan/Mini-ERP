@@ -83,4 +83,25 @@ class Setting extends Model
         }
         return $setting;
     }
+
+    /**
+     * Helper dinamis untuk mengambil nilai konfigurasi berdasarkan key alias atau atribut.
+     */
+    public static function get(string $key, $default = null)
+    {
+        $setting = self::getSetting();
+
+        $aliasMap = [
+            'company_tin'   => 'company_npwp16',
+            'tin'           => 'company_npwp16',
+            'npwp'          => 'company_npwp16',
+            'npwp16'        => 'company_npwp16',
+            'company_nitku' => 'company_nitku',
+            'nitku'         => 'company_nitku',
+        ];
+
+        $attribute = $aliasMap[$key] ?? $key;
+
+        return $setting->{$attribute} ?? $default;
+    }
 }

@@ -8,10 +8,15 @@ use App\Models\DocumentItem;
 use App\Models\Setting;
 use App\Models\Transaction;
 use App\Services\TransactionService;
+use App\Services\CoretaxXmlService;
 use App\Exports\CoretaxFkExport;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
+ 
 
 class DocumentController extends Controller
 {
@@ -105,27 +110,46 @@ class DocumentController extends Controller
         return "{$nextNumber}/{$prefix}/{$romanMonth}/{$currentYear}";
     }
 
-    public function index(Request $request)
+public function index(Request $request)
     {
-        $setting = Setting::getSetting();
+        $setting = Setting::first(); // Sesuaikan jika menggunakan helper custom
+
         $query = Document::with(['customer', 'items'])->latest('date');
 
-        // Filter berdasarkan parameter query 'period' (format: YYYY-MM)
+        // 1. Filter Berdasarkan Periode (YYYY-MM)
         if ($request->filled('period')) {
-            [$year, $month] = explode('-', $request->period);
-            $query->whereYear('date', $year)
-                ->whereMonth('date', $month);
+            $parts = explode('-', $request->period);
+            if (count($parts) === 2) {
+                $year = $parts[0];
+                $month = sprintf('%02d', $parts[1]);
+
+                $driver = DB::connection()->getDriverName();
+
+                if ($driver === 'sqlite') {
+                    $query->whereRaw("strftime('%Y', date) = ?", [$year])
+                          ->whereRaw("strftime('%m', date) = ?", [$month]);
+                } else {
+                    $query->whereYear('date', $year)
+                          ->whereMonth('date', $month);
+                }
+            }
+        }
+
+        // 2. Filter Berdasarkan Status (DRAFT, SENT, PAID)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
         $documents = $query->get();
 
-        // Mengambil daftar bulan & tahun unik dari data tanggal (Aman untuk SQLite & MySQL)
-        $availableMonths = Document::select('date')
+        // 3. Mengambil Option Daftar Bulan Unik
+        $availableMonths = Document::query()
             ->whereNotNull('date')
+            ->select('date')
             ->orderBy('date', 'desc')
             ->get()
             ->map(function ($doc) {
-                $date = \Carbon\Carbon::parse($doc->date);
+                $date = $doc->date instanceof Carbon ? $doc->date : Carbon::parse($doc->date);
                 return (object) [
                     'year'  => $date->format('Y'),
                     'month' => $date->format('m'),
@@ -133,7 +157,8 @@ class DocumentController extends Controller
                     'label' => $date->translatedFormat('F Y'),
                 ];
             })
-            ->unique('value');
+            ->unique('value')
+            ->values();
 
         return view('documents.index', compact('documents', 'availableMonths', 'setting'));
     }
@@ -345,14 +370,55 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')->with('success', 'Dokumen berhasil dihapus');
     }
 
-    // Export Faktur Pajak Keluaran (FK) ke Template Coretax DJP (.xlsx)
-    public function exportCoretax(Request $request)
+    // Export Faktur Pajak Keluaran (FK) ke XML Coretax DJP (v1.6.1)
+    public function exportCoretaxXml(Request $request, CoretaxXmlService $xmlService)
     {
         $request->validate([
             'document_ids'     => 'required|array|min:1',
             'document_ids.*'   => 'exists:documents,id',
             'tax_invoice_date' => 'nullable|date',
         ]);
+
+        $setting = Setting::getSetting();
+        $documents = Document::with(['customer', 'items'])
+            ->whereIn('id', $request->document_ids)
+            ->where('type', 'INVOICE')
+            ->get();
+
+        if ($documents->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada dokumen Invoice yang valid untuk diekspor ke Coretax.');
+        }
+
+        $customDate = $request->tax_invoice_date;
+        $xmlContent = $xmlService->generateXml($documents, $setting, $customDate);
+        $fileName = 'Coretax_FK_v1.6.1_' . date('Ymd_His') . '.xml';
+
+        return response($xmlContent, 200, [
+            'Content-Type'        => 'application/xml; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
+    }
+
+    // Alias method untuk exportXml sesuai spesifikasi requirement
+    public function exportXml(Request $request, CoretaxXmlService $xmlService)
+    {
+        return $this->exportCoretaxXml($request, $xmlService);
+    }
+
+    // Export Faktur Pajak Keluaran (FK) - Mendukung XML v1.6.1 & Excel (.xlsx)
+    public function exportCoretax(Request $request, CoretaxXmlService $xmlService)
+    {
+        $request->validate([
+            'document_ids'     => 'required|array|min:1',
+            'document_ids.*'   => 'exists:documents,id',
+            'tax_invoice_date' => 'nullable|date',
+            'export_type'      => 'nullable|string|in:xml,xlsx,excel',
+        ]);
+
+        // Jika user memilih format XML
+        if ($request->input('export_type') === 'xml' || $request->input('format') === 'xml') {
+            return $this->exportCoretaxXml($request, $xmlService);
+        }
 
         $setting = Setting::getSetting();
         $documents = Document::with(['customer', 'items'])
