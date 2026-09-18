@@ -9,7 +9,7 @@
         $globalSetting = \App\Models\Setting::getSetting();
     @endphp
 
-    <title>{{ $globalSetting->company_name ?? 'Mini ERP' }} — Financial & Invoicing System</title>
+    <title>Mini ERP</title>
     
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
 
     <style>
         :root {
-            --erp-primary: #1e40af;
+            --erp-primary: #2563eb;
             --erp-primary-hover: #1d4ed8;
             --erp-primary-light: #eff6ff;
             --erp-secondary: #0f172a;
@@ -52,45 +52,45 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- MODERN MINIMALIST NAVBAR --- */
-        .navbar-custom {
-            background-color: #0b1329 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 20px -2px rgba(11, 19, 41, 0.35);
-            backdrop-filter: blur(12px);
+        /* --- FLOATING ISLAND NAVBAR STYLE --- */
+        .floating-navbar-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            padding: 16px 20px 8px 20px;
+        }
+
+        .navbar-floating {
+            background-color: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 9999px;
+            padding: 7px 16px !important;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.3s ease;
         }
 
         .navbar-brand-logo {
-            max-height: 32px;
+            max-height: 26px;
             width: auto;
             object-fit: contain;
         }
 
         .brand-text {
             font-weight: 800;
-            letter-spacing: -0.3px;
-            font-size: 1.1rem;
-            color: #ffffff;
-        }
-
-        .brand-badge {
-            font-size: 0.65rem;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #ffffff;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            letter-spacing: -0.4px;
+            font-size: 0.98rem;
+            color: #0f172a;
         }
 
         /* Nav Links */
         .nav-link-custom {
-            color: #94a3b8 !important;
+            color: #475569 !important;
             font-weight: 600;
-            font-size: 0.86rem;
-            padding: 0.5rem 0.95rem !important;
-            border-radius: 8px;
+            font-size: 0.84rem;
+            padding: 0.45rem 1.1rem !important;
+            border-radius: 9999px;
             transition: all 0.2s ease-in-out;
             margin: 0 2px;
             display: inline-flex;
@@ -98,14 +98,43 @@
         }
 
         .nav-link-custom:hover {
-            color: #ffffff !important;
-            background-color: rgba(255, 255, 255, 0.08);
+            color: #0f172a !important;
+            background-color: #f1f5f9;
         }
 
         .nav-link-custom.active {
             color: #ffffff !important;
-            background-color: #1e40af;
-            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.35);
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Dropdown Custom Styling */
+        .dropdown-menu-custom {
+            background-color: #ffffff !important;
+            border-radius: 16px !important;
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.12), 0 8px 15px -4px rgba(15, 23, 42, 0.06) !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 8px !important;
+            margin-top: 10px !important;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: #334155;
+            font-size: 0.83rem;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 8px 14px;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background-color: #f1f5f9;
+            color: #2563eb;
+        }
+
+        .dropdown-menu-custom .dropdown-item.active {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
         }
 
         /* Pulse Indicator */
@@ -131,6 +160,18 @@
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Responsive Navbar Mobile Adjustments */
+        @media (max-width: 991.98px) {
+            .navbar-floating {
+                border-radius: 20px;
+                padding: 10px 16px !important;
+            }
+            .nav-link-custom {
+                border-radius: 10px;
+                margin: 2px 0;
             }
         }
 
@@ -267,57 +308,57 @@
 </head>
 <body>
 
-    <!-- TOP NAVIGATION HEADER BAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-2.5 sticky-top">
+    <!-- FLOATING ISLAND HEADER BAR -->
+    <div class="floating-navbar-wrapper">
         <div class="container-fluid px-lg-5">
-            <!-- Brand & Logo -->
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
-                @if($globalSetting->company_logo && file_exists(public_path('storage/' . $globalSetting->company_logo)))
-                    <img src="{{ asset('storage/' . $globalSetting->company_logo) }}" alt="Logo" class="navbar-brand-logo">
-                @else
-                    <div class="bg-primary text-white rounded-3 p-1 px-2 fw-bolder font-monospace" style="font-size: 0.95rem;">
-                        <i class="fa-solid fa-cube me-1"></i> ERP
-                    </div>
-                @endif
-                <div class="d-flex flex-column">
-                    <span class="brand-text">{{ Str::limit($globalSetting->company_name ?? 'Mini ERP', 25) }}</span>
-                </div>
-            </a>
+            <nav class="navbar navbar-expand-lg navbar-light navbar-floating">
+                <!-- Brand & Logo -->
+                <a class="navbar-brand d-flex align-items-center gap-2 me-lg-4 ms-2" href="{{ route('dashboard') }}">
+                    @if($globalSetting->company_logo && file_exists(public_path('storage/' . $globalSetting->company_logo)))
+                        <img src="{{ asset('storage/' . $globalSetting->company_logo) }}" alt="Logo" class="navbar-brand-logo">
+                    @else
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-cube"></i>
+                        </div>
+                    @endif
+                </a>
 
-            <!-- Mobile Toggle -->
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <!-- Mobile Toggle -->
+                <button class="navbar-toggler border-0 shadow-none me-2" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                <!-- Menu Utama (Tetap Presisi di Tengah) -->
+                <ul class="navbar-nav mx-auto justify-content-center mb-2 mb-lg-0 align-items-lg-center gap-lg-2">
+                    
                     <!-- 1. Dashboard -->
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="fa-solid fa-chart-pie me-1.5"></i> Dashboard
+                            <i class="fa-solid fa-chart-pie me-2"></i> Dashboard
                         </a>
                     </li>
 
                     <!-- 2. Invoicing & Dokumen Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('documents.*') || request()->routeIs('customers.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-file-invoice-dollar me-1.5"></i> Invoicing & PO
+                            <i class="fa-solid fa-file-invoice-dollar me-2"></i> Invoicing & PO
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" style="background-color: #0b1329; border-radius: 12px; min-width: 250px; border: 1px solid rgba(255,255,255,0.08);">
+                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 250px;">
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.create') ? 'active bg-primary' : '' }}" href="{{ route('documents.create') }}">
+                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.create') ? 'active' : '' }}" href="{{ route('documents.create') }}">
                                     <i class="fa-solid fa-plus-circle me-2 text-primary"></i> Buat Invoice / PO Baru
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.index') ? 'active bg-primary' : '' }}" href="{{ route('documents.index') }}">
-                                    <i class="fa-solid fa-folder-open me-2 text-info"></i> Kelola Semua Dokumen
+                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.index') ? 'active' : '' }}" href="{{ route('documents.index') }}">
+                                    <i class="fa-solid fa-folder-open me-2 text-warning"></i> Kelola Dokumen
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                            <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('customers.*') ? 'active bg-primary' : '' }}" href="{{ route('customers.index') }}">
-                                    <i class="fa-solid fa-users me-2 text-success"></i> Direktori Customer
+                                <a class="dropdown-item py-2 {{ request()->routeIs('customers.*') ? 'active' : '' }}" href="{{ route('customers.index') }}">
+                                    <i class="fa-solid fa-users me-2 text-success"></i> Master Customer
                                 </a>
                             </li>
                         </ul>
@@ -326,11 +367,11 @@
                     <!-- 3. Keuangan & Arus Kas Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('transactions.*') || request()->routeIs('categories.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-money-bill-transfer me-1.5"></i> Buku Kas & Transaksi
+                            <i class="fa-solid fa-money-bill-transfer me-2"></i> Buku Kas & Transaksi
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" style="background-color: #0b1329; border-radius: 12px; min-width: 260px; border: 1px solid rgba(255,255,255,0.08);">
+                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 260px;">
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('transactions.index') ? 'active bg-primary' : '' }}" href="{{ route('transactions.index') }}">
+                                <a class="dropdown-item py-2 {{ request()->routeIs('transactions.index') ? 'active' : '' }}" href="{{ route('transactions.index') }}">
                                     <i class="fa-solid fa-receipt me-2 text-info"></i> Jurnal Transaksi Kas
                                 </a>
                             </li>
@@ -344,9 +385,9 @@
                                     <i class="fa-solid fa-plus-circle me-2 text-success"></i> Catat Pemasukan (Income)
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                            <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('categories.*') ? 'active bg-primary' : '' }}" href="{{ route('categories.index') }}">
+                                <a class="dropdown-item py-2 {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') }}">
                                     <i class="fa-solid fa-tags me-2 text-warning"></i> Master Akun & COA
                                 </a>
                             </li>
@@ -356,45 +397,38 @@
                     <!-- 4. Laporan Keuangan Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-chart-line me-1.5"></i> Laporan Keuangan
+                            <i class="fa-solid fa-chart-line me-2"></i> Laporan Keuangan
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" style="background-color: #0b1329; border-radius: 12px; min-width: 280px; border: 1px solid rgba(255,255,255,0.08);">
+                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 280px;">
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.financial_statement*') ? 'active bg-primary' : '' }}" href="{{ route('reports.financial_statement') }}">
+                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.financial_statement*') ? 'active' : '' }}" href="{{ route('reports.financial_statement') }}">
                                     <i class="fa-solid fa-file-contract me-2 text-info"></i> Laporan Keuangan
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.profit_loss*') ? 'active bg-primary' : '' }}" href="{{ route('reports.profit_loss') }}">
+                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.profit_loss*') ? 'active' : '' }}" href="{{ route('reports.profit_loss') }}">
                                     <i class="fa-solid fa-scale-balanced me-2 text-primary"></i> Laba Rugi Komersial & Fiskal
                                 </a>
                             </li>
-                            {{-- <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.entertainment_nominative*') ? 'active bg-primary' : '' }}" href="{{ route('reports.entertainment_nominative') }}">
-                                    <i class="fa-solid fa-champagne-glasses me-2 text-warning"></i> Lampiran Nominatif DJP
-                                </a>
-                            </li> --}}
                         </ul>
-                    </li>
-
-                    <!-- 5. Pengaturan Terpusat -->
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
-                            <i class="fa-solid fa-sliders me-1.5"></i> Pengaturan
-                        </a>
                     </li>
                 </ul>
 
-                <!-- Live Status & Quick Details Widget -->
-                {{-- <div class="d-none d-lg-flex align-items-center gap-2">
-                    <div class="d-flex align-items-center bg-white bg-opacity-10 py-1.5 px-3 rounded-pill border border-white border-opacity-10 text-white font-xs" style="font-size: 0.775rem;">
-                        <span class="pulse-dot me-2"></span>
-                        <span class="fw-semibold">{{ $globalSetting->currency_code ?? 'IDR' }} (PPN {{ $globalSetting->default_tax_rate ?? 11 }}%)</span>
-                    </div>
-                </div> --}}
+                <!-- Navigasi Pengaturan (Mentok Kanan - Icon Only + Tooltip) -->
+                <div class="d-flex align-items-center ms-auto">
+                    <a class="nav-link nav-link-custom rounded-circle d-flex align-items-center justify-content-center {{ request()->routeIs('settings.*') ? 'active' : '' }}" 
+                    href="{{ route('settings.index') }}" 
+                    style="width: 40px; height: 40px;" 
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="bottom" 
+                    title="Pengaturan">
+                        <i class="fa-solid fa-sliders fs-6"></i>
+                    </a>
+                </div>
             </div>
+            </nav>
         </div>
-    </nav>
+    </div>
 
     <!-- MAIN CONTENT CONTAINER -->
     <main class="container-fluid px-lg-5 py-4">

@@ -4,11 +4,8 @@
 <div class="row mb-4 align-items-center">
     <div class="col-md-6">
         <h3 class="fw-bold text-dark mb-1">
-            <i class="fa-solid fa-file-contract text-primary me-2"></i> Laporan Keuangan Profesional
+         Laporan Keuangan Profesional
         </h3>
-        <p class="text-muted mb-0 font-sm">
-            Ringkasan eksekutif, rekap performa penagihan invoice, dan buku kas transaksi berurutan (Ledger).
-        </p>
     </div>
     <div class="col-md-6 text-md-end mt-3 mt-md-0">
         <div class="btn-group shadow-sm">
@@ -82,47 +79,121 @@
 </div>
 
 <!-- 1. Executive Summary Cards -->
-<div class="row g-3 mb-4">
-    <!-- Pemasukan -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 border-success">
-            <span class="text-muted fw-semibold font-xs text-uppercase">1. Total Pemasukan Kas</span>
-            <h4 class="fw-bold text-success mb-0 mt-1">Rp {{ number_format($reportData['total_income'], 0, ',', '.') }}</h4>
-            <div class="font-xs text-muted mt-1">
-                Invoice: Rp {{ number_format($reportData['paid_invoices_income'], 0, ',', '.') }} | Lainnya: Rp {{ number_format($reportData['other_income'], 0, ',', '.') }}
+<!-- Executive Financial Summary Cards Container -->
+<div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+    <!-- Header Banner dengan Gradient Premium -->
+    <div class="card-header border-0 p-4 p-lg-4 text-white position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h4 class="fw-bold mb-0 text-white">Executive Financial Summary</h4>
             </div>
         </div>
     </div>
-    <!-- Pengeluaran -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 border-danger">
-            <span class="text-muted fw-semibold font-xs text-uppercase">2. Total Pengeluaran Kas</span>
-            <h4 class="fw-bold text-danger mb-0 mt-1">Rp {{ number_format($reportData['total_expense'], 0, ',', '.') }}</h4>
-            <div class="font-xs text-muted mt-1">
-                Fiskal: Rp {{ number_format($reportData['deductible_expense'], 0, ',', '.') }} | Non-Fiskal: Rp {{ number_format($reportData['non_deductible_expense'], 0, ',', '.') }}
+
+    <!-- Body / Content KPI Cards -->
+    <div class="card-body p-4 bg-light bg-opacity-50">
+        <div class="row g-3">
+            
+            <!-- 1. Total Pemasukan Kas -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 bg-success" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Pemasukan</span>
+                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Kas Masuk
+                                </span>
+                            </div>
+                            <div class="bg-success bg-opacity-10 text-success rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-wallet fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['total_income'], 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">
+                            Invoice: {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['paid_invoices_income'], 0, ',', '.') }} | Lainnya: {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['other_income'], 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <!-- Laba Bersih -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 {{ $reportData['net_profit'] >= 0 ? 'border-primary' : 'border-danger' }}">
-            <span class="text-muted fw-semibold font-xs text-uppercase">3. Laba / Rugi Bersih</span>
-            <h4 class="fw-bold {{ $reportData['net_profit'] >= 0 ? 'text-primary' : 'text-danger' }} mb-0 mt-1">
-                Rp {{ number_format($reportData['net_profit'], 0, ',', '.') }}
-            </h4>
-            <div class="font-xs text-muted mt-1">
-                Pemasukan Bersih - Pengeluaran
+
+            <!-- 2. Total Pengeluaran Kas -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 bg-danger" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Pengeluaran</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-arrow-down-long me-1"></i>Beban Ops
+                                </span>
+                            </div>
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-money-bill-transfer fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['total_expense'], 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">
+                            Fiskal: {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['deductible_expense'], 0, ',', '.') }} | Non: {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['non_deductible_expense'], 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <!-- Piutang Aktif -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 border-warning">
-            <span class="text-muted fw-semibold font-xs text-uppercase">4. Piutang Belum Terbayar</span>
-            <h4 class="fw-bold text-warning mb-0 mt-1">Rp {{ number_format($reportData['invoicing_summary']['unpaid_amount'], 0, ',', '.') }}</h4>
-            <div class="font-xs text-muted mt-1">
-                {{ $reportData['invoicing_summary']['sent_count'] }} Invoice Sent pending
+
+            <!-- 3. Laba / Rugi Bersih -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 {{ $reportData['net_profit'] >= 0 ? 'bg-primary' : 'bg-danger' }}" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Laba / Rugi Bersih</span>
+                                <span class="badge {{ $reportData['net_profit'] >= 0 ? 'bg-primary-subtle text-primary border-primary' : 'bg-danger-subtle text-danger border-danger' }} border border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid {{ $reportData['net_profit'] >= 0 ? 'fa-chart-line' : 'fa-chart-line-down' }} me-1"></i>Net Profit
+                                </span>
+                            </div>
+                            <div class="{{ $reportData['net_profit'] >= 0 ? 'bg-primary bg-opacity-10 text-primary' : 'bg-danger bg-opacity-10 text-danger' }} rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-scale-balanced fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder {{ $reportData['net_profit'] >= 0 ? 'text-primary' : 'text-danger' }} mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['net_profit'], 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">Pemasukan Bersih - Pengeluaran</p>
+                    </div>
+                </div>
             </div>
+
+            <!-- 4. Piutang Belum Terbayar -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 bg-warning" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Piutang Aktif</span>
+                                <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-clock me-1"></i>Pending
+                                </span>
+                            </div>
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-clock-rotate-left fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($reportData['invoicing_summary']['unpaid_amount'], 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">{{ $reportData['invoicing_summary']['sent_count'] }} Invoice Sent pending</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

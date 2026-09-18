@@ -55,11 +55,6 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/profit-loss', [FinancialReportController::class, 'profitAndLoss'])->name('profit_loss');
     Route::get('/profit-loss/pdf', [FinancialReportController::class, 'exportProfitAndLossPdf'])->name('profit_loss.pdf');
     Route::get('/profit-loss/excel', [FinancialReportController::class, 'exportProfitAndLossExcel'])->name('profit_loss.excel');
-
-    // 6.3 Lampiran Khusus: Daftar Nominatif Biaya Entertainment (DJP)
-    Route::get('/entertainment-nominative', [FinancialReportController::class, 'entertainmentNominative'])->name('entertainment_nominative');
-    Route::get('/entertainment-nominative/pdf', [FinancialReportController::class, 'exportEntertainmentPdf'])->name('entertainment_nominative.pdf');
-    Route::get('/entertainment-nominative/excel', [FinancialReportController::class, 'exportEntertainmentExcel'])->name('entertainment_nominative.excel');
 });
 
 // ==========================================

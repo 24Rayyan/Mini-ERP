@@ -98,12 +98,6 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold text-dark small">NPWP Format Lama (15 Digit)</label>
-                            <input type="text" name="company_npwp" class="form-control" value="{{ old('company_npwp', $setting->company_npwp ?? '') }}" placeholder="00.000.000.0-000.000">
-                            <small class="text-muted font-xs">Untuk cetak invoice lama / format umum.</small>
-                        </div>
-
-                        <div class="col-md-4">
                             <label class="form-label fw-semibold text-primary small">
                                 <i class="fa-solid fa-file-invoice me-1"></i> NPWP 16 Digit Penjual (Coretax DJP)
                             </label>
@@ -185,24 +179,6 @@
                             </div>
                         </div>
 
-                        <!-- Upload Cap Stempel -->
-                        <div class="col-md-6">
-                            <div class="card h-100 bg-light border p-3">
-                                <label class="form-label fw-bold text-dark small mb-1">Cap / Stempel Resmi Perusahaan</label>
-                                <p class="text-muted font-xs mb-3">Format PNG transparan (Dianjurkan background transparan).</p>
-                                <input type="file" name="company_stamp" class="form-control bg-white" accept=".png, .jpg, .jpeg, .webp">
-                                
-                                @if($setting && $setting->company_stamp)
-                                    <div class="mt-3 p-3 bg-white rounded-3 border d-flex align-items-center gap-3">
-                                        <img src="{{ asset('storage/' . $setting->company_stamp) }}" alt="Stamp" class="img-fluid" style="max-height: 50px; max-width: 140px; object-fit: contain;">
-                                        <div>
-                                            <span class="badge bg-success bg-opacity-10 text-success fw-bold font-xs">Stempel Terpasang</span>
-                                            <small class="text-muted d-block font-xs mt-1">Dicetak di kolom tanda tangan</small>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
                     </div>
                 </div>
 

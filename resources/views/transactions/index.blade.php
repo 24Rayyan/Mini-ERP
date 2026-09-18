@@ -4,11 +4,8 @@
 <div class="row mb-4 align-items-center">
     <div class="col-md-7">
         <h3 class="fw-bold text-dark mb-1">
-            <i class="fa-solid fa-money-bill-transfer text-primary me-2"></i> Transaksi Kas & Jurnal Keuangan
+            Cashflow Management
         </h3>
-        <p class="text-muted mb-0 font-sm">
-            Pencatatan arus kas masuk/keluar, lampiran bukti nota, dan integrasi otomatis invoice lunas.
-        </p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <div class="btn-group shadow-sm">
@@ -36,50 +33,93 @@
 </div>
 @endif
 
-<!-- Executive Cashflow Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 border-success">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="text-muted fw-semibold font-xs text-uppercase">Total Pemasukan Kas</span>
-                    <h4 class="fw-bold text-success mb-0 mt-1">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
-                    <small class="text-muted font-xs">{{ $transactions->where('type', 'income')->count() }} transaksi masuk</small>
-                </div>
-                <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
-                    <i class="fa-solid fa-arrow-trend-up fs-4"></i>
-                </div>
+<!-- Executive Cashflow Cards Container -->
+<div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+    <!-- Header Banner dengan Gradient Premium -->
+    <div class="card-header border-0 p-4 p-lg-4 text-white position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h4 class="fw-bold mb-0 text-white">Executive Cashflow Summary</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 border-danger">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="text-muted fw-semibold font-xs text-uppercase">Total Pengeluaran Kas</span>
-                    <h4 class="fw-bold text-danger mb-0 mt-1">Rp {{ number_format($totalExpense, 0, ',', '.') }}</h4>
-                    <small class="text-muted font-xs">{{ $transactions->where('type', 'expense')->count() }} transaksi keluar</small>
-                </div>
-                <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle">
-                    <i class="fa-solid fa-arrow-trend-down fs-4"></i>
+
+    <!-- Body / Content KPI Cards -->
+    <div class="card-body p-4 bg-light bg-opacity-50">
+        <div class="row g-3">
+            
+            <!-- 1. Total Pemasukan Kas -->
+            <div class="col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 bg-success" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Pemasukan Kas</span>
+                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-arrow-trend-up me-1"></i>{{ $transactions->where('type', 'income')->count() }} Transaksi
+                                </span>
+                            </div>
+                            <div class="bg-success bg-opacity-10 text-success rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-arrow-trend-up fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($totalIncome, 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">Total akumulasi kas masuk</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-4 {{ $netCashflow >= 0 ? 'border-primary' : 'border-warning' }}">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="text-muted fw-semibold font-xs text-uppercase">Arus Kas Bersih (Net Cashflow)</span>
-                    <h4 class="fw-bold {{ $netCashflow >= 0 ? 'text-primary' : 'text-danger' }} mb-0 mt-1">
-                        Rp {{ number_format($netCashflow, 0, ',', '.') }}
-                    </h4>
-                    <small class="text-muted font-xs">Kas Masuk - Kas Keluar Periode Ini</small>
-                </div>
-                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
-                    <i class="fa-solid fa-wallet fs-4"></i>
+
+            <!-- 2. Total Pengeluaran Kas -->
+            <div class="col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 bg-danger" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Pengeluaran Kas</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-arrow-trend-down me-1"></i>{{ $transactions->where('type', 'expense')->count() }} Transaksi
+                                </span>
+                            </div>
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-arrow-trend-down fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($totalExpense, 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">Total akumulasi kas keluar</p>
+                    </div>
                 </div>
             </div>
+
+            <!-- 3. Arus Kas Bersih (Net Cashflow) -->
+            <div class="col-sm-12 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden transition-all hover-shadow">
+                    <div class="position-absolute top-0 start-0 bottom-0 {{ $netCashflow >= 0 ? 'bg-primary' : 'bg-warning' }}" style="width: 4px;"></div>
+                    <div class="card-body p-3 ps-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Arus Kas Bersih</span>
+                                <span class="badge {{ $netCashflow >= 0 ? 'bg-primary-subtle text-primary border-primary' : 'bg-warning-subtle text-warning border-warning' }} border border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
+                                    <i class="fa-solid fa-wallet me-1"></i>Net Cashflow
+                                </span>
+                            </div>
+                            <div class="{{ $netCashflow >= 0 ? 'bg-primary bg-opacity-10 text-primary' : 'bg-warning bg-opacity-10 text-warning' }} rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-wallet fs-5"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bolder {{ $netCashflow >= 0 ? 'text-primary' : 'text-danger' }} mb-1 tracking-tight">
+                            {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($netCashflow, 0, ',', '.') }}
+                        </h4>
+                        <p class="text-muted font-xs mb-0">Kas Masuk - Kas Keluar Periode Ini</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

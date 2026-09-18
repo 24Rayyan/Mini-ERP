@@ -121,8 +121,8 @@
                         <th width="20%">No. Dokumen</th>
                         <th width="22%">Customer</th>
                         <th width="16%">Total Tagihan</th>
-                        <th width="14%">Status (Quick Change)</th>
-                        <th width="12%" class="text-center">PDF Export</th>
+                        <th width="14%">Status</th>
+                        <th width="12%" class="text-center">PDF</th>
                         <th width="12%" class="text-center">Aksi</th>
                     </tr>
                 </thead>
