@@ -27,7 +27,7 @@
                             <div>
                                 <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Omset</span>
                                 <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
-                                    <i class="fa-solid fa-circle-check me-1"></i>Terlunasi
+                                    <i class="fa-solid fa-circle-check me-1"></i>Lunas
                                 </span>
                             </div>
                             <div class="bg-success bg-opacity-10 text-success rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
@@ -37,7 +37,6 @@
                         <h4 class="fw-bolder text-dark mb-1 tracking-tight">
                             {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($totalOmset, 0, ',', '.') }}
                         </h4>
-                        <p class="text-muted font-xs mb-0">Total invoice berstatus <strong class="text-success">PAID</strong></p>
                     </div>
                 </div>
             </div>
@@ -51,7 +50,7 @@
                             <div>
                                 <span class="text-uppercase font-xs fw-bold text-muted tracking-wider d-block">Total Piutang</span>
                                 <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 rounded-pill font-xs px-2 py-0.5 mt-1">
-                                    <i class="fa-solid fa-clock me-1"></i>Pending
+                                    <i class="fa-solid fa-clock me-1"></i>Belum Lunas
                                 </span>
                             </div>
                             <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
@@ -61,7 +60,6 @@
                         <h4 class="fw-bolder text-dark mb-1 tracking-tight">
                             {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($totalPiutang, 0, ',', '.') }}
                         </h4>
-                        <p class="text-muted font-xs mb-0">Menunggu pembayaran klien</p>
                     </div>
                 </div>
             </div>
@@ -85,7 +83,6 @@
                         <h4 class="fw-bolder text-dark mb-1 tracking-tight">
                             {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($totalExpense, 0, ',', '.') }}
                         </h4>
-                        <p class="text-muted font-xs mb-0">Beban & operasional bisnis</p>
                     </div>
                 </div>
             </div>
@@ -109,7 +106,6 @@
                         <h4 class="fw-bolder {{ $netProfit >= 0 ? 'text-primary' : 'text-danger' }} mb-1 tracking-tight">
                             {{ $setting->currency_symbol ?? 'Rp' }} {{ number_format($netProfit, 0, ',', '.') }}
                         </h4>
-                        <p class="text-muted font-xs mb-0">Pendapatan dikurangi beban</p>
                     </div>
                 </div>
             </div>

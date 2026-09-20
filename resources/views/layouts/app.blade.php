@@ -9,7 +9,7 @@
         $globalSetting = \App\Models\Setting::getSetting();
     @endphp
 
-    <title>Mini ERP</title>
+    <title>{{ $title ?? 'Mini ERP' }}</title>
     
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,18 +17,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- FontAwesome 6 Pro/Free Icons -->
+    <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- DataTables Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     
+    
     <!-- Select2 CSS & Bootstrap 5 Theme -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
+    
     <style>
         :root {
             --erp-primary: #2563eb;
@@ -305,16 +308,19 @@
             background: #94a3b8;
         }
     </style>
+
+    @stack('styles')
 </head>
 <body>
 
     <!-- FLOATING ISLAND HEADER BAR -->
     <div class="floating-navbar-wrapper">
         <div class="container-fluid px-lg-5">
-            <nav class="navbar navbar-expand-lg navbar-light navbar-floating">
-                <!-- Brand & Logo -->
-                <a class="navbar-brand d-flex align-items-center gap-2 me-lg-4 ms-2" href="{{ route('dashboard') }}">
-                    @if($globalSetting->company_logo && file_exists(public_path('storage/' . $globalSetting->company_logo)))
+            <nav class="navbar navbar-expand-lg navbar-light navbar-floating position-relative">
+                
+                <!-- 1. Brand & Logo (Sisi Kiri) -->
+                <a class="navbar-brand d-flex align-items-center gap-2 me-0 ms-2" href="{{ route('dashboard') }}">
+                    @if(isset($globalSetting) && $globalSetting->company_logo && file_exists(public_path('storage/' . $globalSetting->company_logo)))
                         <img src="{{ asset('storage/' . $globalSetting->company_logo) }}" alt="Logo" class="navbar-brand-logo">
                     @else
                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.85rem;">
@@ -328,104 +334,155 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <!-- Menu Utama (Tetap Presisi di Tengah) -->
-                <ul class="navbar-nav mx-auto justify-content-center mb-2 mb-lg-0 align-items-lg-center gap-lg-2">
-                    
-                    <!-- 1. Dashboard -->
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="fa-solid fa-chart-pie me-2"></i> Dashboard
-                        </a>
-                    </li>
+                <!-- 2. Main Content Wrapper -->
+                <div class="collapse navbar-collapse w-100" id="mainNavbar">
+                    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-between w-100">
+                        
+                        <div class="d-none d-lg-block" style="flex: 1;"></div>
 
-                    <!-- 2. Invoicing & Dokumen Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('documents.*') || request()->routeIs('customers.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-file-invoice-dollar me-2"></i> Invoicing & PO
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 250px;">
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.create') ? 'active' : '' }}" href="{{ route('documents.create') }}">
-                                    <i class="fa-solid fa-plus-circle me-2 text-primary"></i> Buat Invoice / PO Baru
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('documents.index') ? 'active' : '' }}" href="{{ route('documents.index') }}">
-                                    <i class="fa-solid fa-folder-open me-2 text-warning"></i> Kelola Dokumen
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('customers.*') ? 'active' : '' }}" href="{{ route('customers.index') }}">
-                                    <i class="fa-solid fa-users me-2 text-success"></i> Master Customer
-                                </a>
-                            </li>
+                        <!-- Menu Utama -->
+                        <ul class="navbar-nav justify-content-center align-items-center gap-lg-2 my-2 my-lg-0">
+                            
+                            @if(auth()->user()->hasAccess('dashboard'))
+                                <li class="nav-item">
+                                    <a class="nav-link nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                                        <i class="fa-solid fa-chart-pie me-2"></i> Dashboard
+                                    </a>
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->hasAccess('invoices'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('documents.*') || request()->routeIs('customers.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-file-invoice-dollar me-2"></i> Invoicing & PO
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 250px;">
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('documents.create') ? 'active' : '' }}" href="{{ route('documents.create') }}">
+                                                <i class="fa-solid fa-plus-circle me-2 text-primary"></i> Buat Invoice / PO Baru
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('documents.index') ? 'active' : '' }}" href="{{ route('documents.index') }}">
+                                                <i class="fa-solid fa-folder-open me-2 text-warning"></i> Kelola Dokumen
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('customers.*') ? 'active' : '' }}" href="{{ route('customers.index') }}">
+                                                <i class="fa-solid fa-users me-2 text-success"></i> Master Customer
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->hasAccess('expenses'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('transactions.*') || request()->routeIs('categories.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-money-bill-transfer me-2"></i> Buku Kas & Transaksi
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 260px;">
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('transactions.index') ? 'active' : '' }}" href="{{ route('transactions.index') }}">
+                                                <i class="fa-solid fa-receipt me-2 text-info"></i> Jurnal Transaksi Kas
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('transactions.create', ['type' => 'expense']) }}">
+                                                <i class="fa-solid fa-minus-circle me-2 text-danger"></i> Catat Pengeluaran (Expense)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ route('transactions.create', ['type' => 'income']) }}">
+                                                <i class="fa-solid fa-plus-circle me-2 text-success"></i> Catat Pemasukan (Income)
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') }}">
+                                                <i class="fa-solid fa-tags me-2 text-warning"></i> Master Akun & COA
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->hasAccess('reports'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-chart-line me-2"></i> Laporan Keuangan
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 280px;">
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('reports.financial_statement*') ? 'active' : '' }}" href="{{ route('reports.financial_statement') }}">
+                                                <i class="fa-solid fa-file-contract me-2 text-info"></i> Laporan Keuangan
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('reports.profit_loss*') ? 'active' : '' }}" href="{{ route('reports.profit_loss') }}">
+                                                <i class="fa-solid fa-scale-balanced me-2 text-primary"></i> Laba Rugi Komersial & Fiskal
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
+                            @if(auth()->user()->hasAccess('user_management'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('management.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-user-gear me-2"></i> User Management
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 220px;">
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('management.users.*') ? 'active' : '' }}" href="{{ route('management.users.index') }}">
+                                                <i class="fa-solid fa-users-gear me-2 text-primary"></i> Kelola User
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2 {{ request()->routeIs('management.roles.*') ? 'active' : '' }}" href="{{ route('management.roles.index') }}">
+                                                <i class="fa-solid fa-shield-halved me-2 text-warning"></i> Kelola Role & Hak Akses
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
                         </ul>
-                    </li>
 
-                    <!-- 3. Keuangan & Arus Kas Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('transactions.*') || request()->routeIs('categories.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-money-bill-transfer me-2"></i> Buku Kas & Transaksi
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 260px;">
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('transactions.index') ? 'active' : '' }}" href="{{ route('transactions.index') }}">
-                                    <i class="fa-solid fa-receipt me-2 text-info"></i> Jurnal Transaksi Kas
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ route('transactions.create', ['type' => 'expense']) }}">
-                                    <i class="fa-solid fa-minus-circle me-2 text-danger"></i> Catat Pengeluaran (Expense)
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ route('transactions.create', ['type' => 'income']) }}">
-                                    <i class="fa-solid fa-plus-circle me-2 text-success"></i> Catat Pemasukan (Income)
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider border-secondary opacity-10 my-1"></li>
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') }}">
-                                    <i class="fa-solid fa-tags me-2 text-warning"></i> Master Akun & COA
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                        <!-- Navigasi Aksi: Settings & Logout (Sisi Kanan) -->
+                        <div class="d-flex align-items-center justify-content-center justify-content-lg-end" style="flex: 1;">
+                            <div class="action-buttons-wrapper d-flex align-items-center bg-light border rounded-pill p-1 gap-1 shadow-sm">
+                                
+                                @if(auth()->user()->hasAccess('settings'))
+                                    <a class="nav-link nav-link-custom rounded-circle d-flex align-items-center justify-content-center {{ request()->routeIs('settings.*') ? 'active bg-white text-primary shadow-sm' : 'text-secondary' }}" 
+                                    href="{{ route('settings.index') }}" 
+                                    style="width: 36px; height: 36px; transition: all 0.2s ease;" 
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="bottom" 
+                                    title="Pengaturan Perusahaan">
+                                        <i class="fa-solid fa-sliders fs-6"></i>
+                                    </a>
+                                @endif
 
-                    <!-- 4. Laporan Keuangan Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom dropdown-toggle {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-chart-line me-2"></i> Laporan Keuangan
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-custom border-0 shadow-lg" style="min-width: 280px;">
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.financial_statement*') ? 'active' : '' }}" href="{{ route('reports.financial_statement') }}">
-                                    <i class="fa-solid fa-file-contract me-2 text-info"></i> Laporan Keuangan
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 {{ request()->routeIs('reports.profit_loss*') ? 'active' : '' }}" href="{{ route('reports.profit_loss') }}">
-                                    <i class="fa-solid fa-scale-balanced me-2 text-primary"></i> Laba Rugi Komersial & Fiskal
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                                <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="btn btn-link nav-link-custom rounded-circle d-flex align-items-center justify-content-center text-danger border-0 p-0" 
+                                            style="width: 36px; height: 36px; transition: all 0.2s ease;" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-placement="bottom" 
+                                            title="Keluar / Logout">
+                                        <i class="fa-solid fa-right-from-bracket fs-6"></i>
+                                    </button>
+                                </form>
 
-                <!-- Navigasi Pengaturan (Mentok Kanan - Icon Only + Tooltip) -->
-                <div class="d-flex align-items-center ms-auto">
-                    <a class="nav-link nav-link-custom rounded-circle d-flex align-items-center justify-content-center {{ request()->routeIs('settings.*') ? 'active' : '' }}" 
-                    href="{{ route('settings.index') }}" 
-                    style="width: 40px; height: 40px;" 
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="bottom" 
-                    title="Pengaturan">
-                        <i class="fa-solid fa-sliders fs-6"></i>
-                    </a>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
+
             </nav>
         </div>
     </div>
@@ -435,72 +492,28 @@
         @yield('content')
     </main>
 
-    <!-- FOOTER -->
-    <footer class="py-3 mt-auto">
-        <div class="container-fluid px-lg-5 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-            <div>
-                &copy; {{ date('Y') }} <strong>{{ $globalSetting->company_name ?? 'Mini ERP System' }}</strong>. All rights reserved.
-            </div>
-            <div class="text-muted small">
-                <span>Versi 2.0 Mini ERP &bull; Realtime Accounting Engine</span>
-            </div>
-        </div>
-    </footer>
-
     <!-- Core Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     
     <script>
-        // Global Toast Notification Helper
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3500,
-            timerProgressBar: true
+        // Setup CSRF Token secara otomatis untuk semua request AJAX jQuery
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
 
-        // Flash message handling
-        @if(session('success'))
-            Toast.fire({
-                icon: 'success',
-                title: "{{ session('success') }}"
-            });
-        @endif
-
-        @if(session('error'))
-            Toast.fire({
-                icon: 'error',
-                title: "{{ session('error') }}"
-            });
-        @endif
-
-        // Dynamic status selector colorization
-        function applyStatusColor(element) {
-            let val = $(element).val();
-            $(element).removeClass('status-draft status-sent status-paid');
-            
-            if (val === 'DRAFT') {
-                $(element).addClass('status-draft');
-            } else if (val === 'SENT') {
-                $(element).addClass('status-sent');
-            } else if (val === 'PAID') {
-                $(element).addClass('status-paid');
-            }
-        }
-
-        $(document).ready(function() {
-            $('.status-select').each(function() {
-                applyStatusColor(this);
-            });
-
-            $(document).on('change', '.status-select', function() {
-                applyStatusColor(this);
+        // Inisialisasi Bootstrap Tooltips
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
@@ -508,3 +521,4 @@
     @stack('scripts')
 </body>
 </html>
+
