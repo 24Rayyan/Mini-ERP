@@ -327,6 +327,9 @@
                             <i class="fa-solid fa-cube"></i>
                         </div>
                     @endif
+                    <span class="fw-semibold text-dark fs-6 ms-3">
+                        Hello {{ Auth::user()->username ?? 'User' }} !
+                    </span>
                 </a>
 
                 <!-- Mobile Toggle -->

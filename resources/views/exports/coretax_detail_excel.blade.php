@@ -1,58 +1,105 @@
 <table>
     <thead>
         <tr>
-            <th>NOMOR_DOKUMEN_REFERENSI</th>
-            <th>BARIS</th>
-            <th>KODE_BARANG_JASA</th>
-            <th>NAMA_BARANG_JASA</th>
-            <th>SATUAN</th>
-            <th>HARGA_SATUAN</th>
-            <th>KUANTITAS</th>
-            <th>TOTAL_HARGA_DPP</th>
-            <th>DISKON</th>
-            <th>TARIF_PPN</th>
-            <th>NOMINAL_PPN</th>
-            <th>TARIF_PPNBM</th>
-            <th>NOMINAL_PPNBM</th>
+            <th>Baris</th>
+            <th>Barang/Jasa</th>
+            <th>Kode Barang Jasa</th>
+            <th>Nama Barang/Jasa</th>
+            <th>Nama Satuan Ukur</th>
+            <th>Harga Satuan</th>
+            <th>Jumlah Barang Jasa</th>
+            <th>Total Diskon</th>
+            <th>DPP</th>
+            <th>DPP Nilai Lain</th>
+            <th>Tarif PPN</th>
+            <th>PPN</th>
+            <th>Tarif PPnBM</th>
+            <th>PPnBM</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($documents as $doc)
+        @foreach($documents as $docIndex => $doc)
             @php
-                $taxRatePercent = ($setting->enable_tax ?? true) ? ($setting->default_tax_rate ?? 11) : 0;
-                // Prioritas Kode FP: (1) Detail Customer, (2) Kode di Dokumen, (3) Default 040
+                $taxRatePercent = ($setting->enable_tax ?? true) ? ($setting->default_tax_rate ?? 12) : 0;
+                
                 $customerFpCode = $doc->customer?->default_tax_transaction_code ?? null;
-                $rawTrxCode = (!empty($customerFpCode)) ? $customerFpCode : ($doc->tax_transaction_code ?? '040');
-                if (empty($rawTrxCode)) $rawTrxCode = '040';
+                $rawTrxCode = (!empty($customerFpCode)) ? $customerFpCode : ($doc->tax_transaction_code ?? '04');
+                
                 $trxCode = substr(preg_replace('/[^0-9]/', '', $rawTrxCode), 0, 2);
                 if (empty($trxCode)) $trxCode = '04';
+
+                $rowNumber = $docIndex + 1;
             @endphp
-            @foreach($doc->items as $idx => $item)
+            
+            @foreach($doc->items as $item)
                 @php
-                    $itemDpp = $item->subtotal;
-                    $otherTaxBase = ($trxCode === '04') ? (isset($item->other_tax_base) ? (float)$item->other_tax_base : round(($itemDpp * 11) / 12, 2)) : 0;
-                    $taxBaseForVat = ($trxCode === '04') ? $otherTaxBase : $itemDpp;
-                    $itemPpn = round($taxBaseForVat * ($taxRatePercent / 100), 2);
+                    $itemDpp = (float) $item->subtotal;
+                    
                     $opt = \App\Services\CoretaxXmlService::determineItemOpt($item);
                     $unitCode = \App\Services\CoretaxXmlService::getUnitCode($opt);
                     $itemCode = $item->coretax_code ?? '000000';
+                    
+                    $typeCategory = (!empty($item->is_service) && $item->is_service) ? 'B' : 'A';
+                    
+                    $isTrx04 = ($trxCode === '04');
+                    
+                    if ($isTrx04) {
+                        $dppNilaiLain = round(($itemDpp * 11) / 12, 2);
+                        $ppnAmount = round($dppNilaiLain * 0.12, 2);
+                        $displayTaxRate = 12;
+                    } else {
+                        $dppNilaiLain = 0;
+                        $ppnAmount = round($itemDpp * ($taxRatePercent / 100), 2);
+                        $displayTaxRate = $taxRatePercent;
+                    }
                 @endphp
                 <tr>
-                    <td style="mso-number-format:'\@';">{{ $doc->document_number }}</td>
-                    <td>{{ $idx + 1 }}</td>
-                    <td style="mso-number-format:'\@';">{{ $itemCode }}</td>
+                    {{-- 1. Baris --}}
+                    <td>{{ (int)$rowNumber }}</td>
+                    
+                    {{-- 2. Barang/Jasa --}}
+                    <td>{{ $typeCategory }}</td>
+                    
+                    {{-- 3. Kode Barang Jasa --}}
+                    <td style='mso-number-format:"\@";'>{{ $itemCode }}</td>
+                    
+                    {{-- 4. Nama Barang/Jasa --}}
                     <td>{{ $item->description }}</td>
-                    <td style="mso-number-format:'\@';">{{ $unitCode }}</td>
-                    <td>{{ $item->price }}</td>
-                    <td>{{ $item->qty }}</td>
-                    <td>{{ $itemDpp }}</td>
+                    
+                    {{-- 5. Nama Satuan Ukur --}}
+                    <td style='mso-number-format:"\@";'>{{ $unitCode }}</td>
+                    
+                    {{-- 6. Harga Satuan (RAW FLOAT) --}}
+                    <td>{{ (float)$item->price }}</td>
+                    
+                    {{-- 7. Jumlah Barang Jasa --}}
+                    <td>{{ (int)$item->qty }}</td>
+                    
+                    {{-- 8. Total Diskon --}}
                     <td>0</td>
-                    <td>{{ $taxRatePercent / 100 }}</td>
-                    <td>{{ $itemPpn }}</td>
+                    
+                    {{-- 9. DPP (RAW FLOAT) --}}
+                    <td>{{ (float)$itemDpp }}</td>
+                    
+                    {{-- 10. DPP NILAI LAIN (RAW FLOAT) --}}
+                    <td>{{ (float)$dppNilaiLain }}</td>
+                    
+                    {{-- 11. Tarif PPN --}}
+                    <td>{{ (int)$displayTaxRate }}</td>
+                    
+                    {{-- 12. PPN (RAW FLOAT) --}}
+                    <td>{{ (float)$ppnAmount }}</td>
+                    
+                    {{-- 13. Tarif PPnBM --}}
                     <td>0</td>
+                    
+                    {{-- 14. PPnBM --}}
                     <td>0</td>
                 </tr>
             @endforeach
         @endforeach
+        <tr>
+            <td>END</td>
+        </tr>
     </tbody>
 </table>

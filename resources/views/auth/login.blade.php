@@ -38,7 +38,7 @@
         </div>
         
         <h1 class="text-2xl font-bold tracking-tight text-slate-900">
-            {{ $globalSetting->company_name ?? 'Mini ERP DCI' }}
+            {{ $globalSetting->company_name ?? 'Mini ERP' }}
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">Masuk ke akun Anda untuk mengakses sistem</p>
     </div>
@@ -151,7 +151,7 @@
         <!-- Footer Copyright Ringkas -->
         <div class="mt-8 pt-6 border-t border-slate-100 text-center">
             <p class="text-[11px] text-slate-400">
-                &copy; {{ date('Y') }} Mini ERP DCI. All rights reserved.
+                &copy; {{ date('Y') }} Mini ERP
             </p>
         </div>
 

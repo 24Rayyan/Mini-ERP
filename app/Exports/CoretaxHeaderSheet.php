@@ -35,34 +35,29 @@ class CoretaxHeaderSheet implements FromView, ShouldAutoSize, WithStyles, WithTi
 
     public function title(): string
     {
-        return 'FAKTUR_KELUARAN';
+        return 'Faktur';
     }
 
     public function columnFormats(): array
     {
+        // Sesuaikan urutan kolom dengan Blade View
         return [
-            'A' => NumberFormat::FORMAT_TEXT, // KODE TRANSAKSI
-            'B' => NumberFormat::FORMAT_TEXT, // NOMOR DOKUMEN REFERENSI
-            'C' => NumberFormat::FORMAT_TEXT, // TANGGAL FAKTUR
-            'D' => NumberFormat::FORMAT_TEXT, // NPWP PENJUAL (16 DIGIT)
-            'E' => NumberFormat::FORMAT_TEXT, // NITKU PENJUAL (22 DIGIT)
-            'F' => NumberFormat::FORMAT_TEXT, // NAMA PENJUAL
-            'G' => NumberFormat::FORMAT_TEXT, // ALAMAT PENJUAL
-            'H' => NumberFormat::FORMAT_TEXT, // JENIS ID PEMBELI
-            'I' => NumberFormat::FORMAT_TEXT, // NOMOR ID PEMBELI (16 DIGIT)
-            'J' => NumberFormat::FORMAT_TEXT, // NITKU PEMBELI (22 DIGIT)
-            'K' => NumberFormat::FORMAT_TEXT, // NAMA PEMBELI
-            'L' => NumberFormat::FORMAT_TEXT, // ALAMAT PEMBELI
-            'M' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // DPP
-            'N' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // PPN
-            'O' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // PPNBM
+            'A' => NumberFormat::FORMAT_TEXT, // Baris
+            'B' => NumberFormat::FORMAT_TEXT, // Tanggal Faktur
+            'D' => NumberFormat::FORMAT_TEXT, // Kode Transaksi
+            'H' => NumberFormat::FORMAT_TEXT, // Referensi
+            'J' => NumberFormat::FORMAT_TEXT, // ID TKU Penjual (22 digit)
+            'K' => NumberFormat::FORMAT_TEXT, // NPWP/NIK Pembeli (16 digit)
+            'N' => NumberFormat::FORMAT_TEXT, // Nomor Dokumen Pembeli
+            'R' => NumberFormat::FORMAT_TEXT, // ID TKU Pembeli (22 digit)
         ];
     }
 
     public function styles(Worksheet $sheet): ?array
     {
         return [
-            1 => [
+            // Baris 3 adalah Header Kolom Utama
+            3 => [
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '1E40AF']],
                 'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],

@@ -35,7 +35,7 @@
             </button>
             <button type="button" class="btn btn-sm btn-primary rounded-3 fw-bold px-3 d-inline-flex align-items-center gap-2 shadow-sm" id="btnOpenCoretaxModal">
                 <i class="fa-solid fa-file-code"></i>
-                <span>Export Coretax DJP (XML / Excel)</span>
+                <span>Export Template Coretax (XML / Excel)</span>
             </button>
         </div>
     </div>
@@ -257,7 +257,7 @@
                 <div class="modal-header border-0 pb-0 pt-4 px-4">
                     <div>
                         <div class="badge bg-primary-subtle text-primary fw-bold px-2.5 py-1.5 rounded-pill mb-1 small">
-                            <i class="fa-solid fa-code me-1"></i> Coretax DJP v1.6.1 Ready
+                            <i class="fa-solid fa-code"></i>
                         </div>
                         <h5 class="modal-title fw-bold text-dark" id="coretaxExportModalLabel">Export Faktur Pajak Keluaran (FK)</h5>
                         <p class="text-muted small mb-0">File XML resmi (TaxInvoiceBulk v1.6.1) atau Spreadsheet Excel multi-sheet (NPWP 16 Digit & NITKU 22 Digit).</p>
@@ -306,12 +306,6 @@
                                 <input type="date" name="tax_invoice_date" class="form-control form-control-sm rounded-3">
                                 <span class="text-muted" style="font-size: 0.75rem;">Kosongkan jika ingin menggunakan tanggal asli dari masing-masing Invoice.</span>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold text-secondary">Kode Transaksi Faktur</label>
-                                <div class="form-control form-control-sm bg-white text-muted">
-                                    <span class="small">Mengikuti Kode Transaksi masing-masing invoice / default customer (040/020/010).</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -327,7 +321,7 @@
                         </button>
                         <button type="submit" name="export_type" value="xml" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                             <i class="fa-solid fa-file-code fs-6"></i>
-                            <span>Download XML Coretax (v1.6.1)</span>
+                            <span>XML</span>
                         </button>
                     </div>
                 </div>
@@ -581,55 +575,57 @@
         });
 
         // Open Coretax Modal & calculate summary
-        $('#btnOpenCoretaxModal').on('click', function() {
-            let checkedBoxes = dataTable.$('.doc-checkbox:checked');
-            let count = checkedBoxes.length;
+$('#btnOpenCoretaxModal').on('click', function() {
+    let checkedBoxes = dataTable.$('.doc-checkbox:checked');
+    let count = checkedBoxes.length;
 
-            if (count === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Pilih Dokumen',
-                    text: 'Pilih minimal satu faktur / invoice untuk diekspor ke Coretax!'
-                });
-                return;
-            }
-
-            let totalSubtotal = 0;
-            let totalTax = 0;
-            let missingTaxId = 0;
-            let hiddenInputsHtml = '';
-
-            checkedBoxes.each(function() {
-                let id = $(this).val();
-                let subtotal = parseFloat($(this).data('subtotal')) || 0;
-                let tax = parseFloat($(this).data('tax')) || 0;
-                let hasTaxId = $(this).data('has-tax-id') == '1';
-
-                totalSubtotal += subtotal;
-                totalTax += tax;
-                if (!hasTaxId) {
-                    missingTaxId++;
-                }
-
-                hiddenInputsHtml += `<input type="hidden" name="document_ids[]" value="${id}">`;
-            });
-
-            $('#modalCount').text(count);
-            $('#modalSubtotal').text(formatRupiah(totalSubtotal));
-            $('#modalTax').text(formatRupiah(totalTax));
-            $('#modalHiddenIds').html(hiddenInputsHtml);
-
-            if (missingTaxId > 0) {
-                $('#missingTaxIdCount').text(missingTaxId);
-                $('#modalTaxIdWarning').removeClass('d-none');
-            } else {
-                $('#modalTaxIdWarning').addClass('d-none');
-            }
-
-            let modalEl = document.getElementById('coretaxExportModal');
-            let modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modal.show();
+    if (count === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Pilih Dokumen',
+            text: 'Pilih minimal satu faktur / invoice untuk diekspor ke Coretax!'
         });
+        return;
+    }
+
+    let totalDpp = 0; // Mengumpulkan DPP murni
+    let totalTax = 0;
+    let missingTaxId = 0;
+    let hiddenInputsHtml = '';
+
+    checkedBoxes.each(function() {
+        let id = $(this).val();
+        
+        // UBAH DI SINI: Gunakan data-dpp (bukan data-subtotal)
+        let dpp = parseFloat($(this).data('dpp')) || 0; 
+        let tax = parseFloat($(this).data('tax')) || 0;
+        let hasTaxId = $(this).data('has-tax-id') == '1';
+
+        totalDpp += dpp;
+        totalTax += tax;
+        if (!hasTaxId) {
+            missingTaxId++;
+        }
+
+        hiddenInputsHtml += `<input type="hidden" name="document_ids[]" value="${id}">`;
+    });
+
+    $('#modalCount').text(count);
+    $('#modalSubtotal').text(formatRupiah(totalDpp)); // Menampilkan total DPP murni
+    $('#modalTax').text(formatRupiah(totalTax));
+    $('#modalHiddenIds').html(hiddenInputsHtml);
+
+    if (missingTaxId > 0) {
+        $('#missingTaxIdCount').text(missingTaxId);
+        $('#modalTaxIdWarning').removeClass('d-none');
+    } else {
+        $('#modalTaxIdWarning').addClass('d-none');
+    }
+
+    let modalEl = document.getElementById('coretaxExportModal');
+    let modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modal.show();
+});
 
         // Quick status update AJAX (Event Delegation)
         $('#myTable tbody').on('change', '.status-select', function() {

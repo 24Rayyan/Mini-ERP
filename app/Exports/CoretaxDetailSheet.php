@@ -32,24 +32,26 @@ class CoretaxDetailSheet implements FromView, ShouldAutoSize, WithStyles, WithTi
 
     public function title(): string
     {
-        return 'DETAIL_OBJEK_FAKTUR';
+        return 'DetailFaktur';
     }
 
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_TEXT, // NOMOR DOKUMEN REFERENSI
-            'B' => NumberFormat::FORMAT_NUMBER, // NO URUT BARIS
-            'C' => NumberFormat::FORMAT_TEXT, // KODE BARANG JASA
-            'D' => NumberFormat::FORMAT_TEXT, // NAMA BARANG JASA
-            'E' => NumberFormat::FORMAT_TEXT, // SATUAN
-            'F' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // HARGA SATUAN
-            'G' => NumberFormat::FORMAT_NUMBER, // QTY
-            'H' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // TOTAL DPP
-            'I' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // DISKON
-            'J' => NumberFormat::FORMAT_PERCENTAGE_00, // TARIF PPN
-            'K' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // NOMINAL PPN
-            'L' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // NOMINAL PPNBM
+            'A' => NumberFormat::FORMAT_NUMBER,               // 1. Baris
+            'B' => NumberFormat::FORMAT_TEXT,                 // 2. Barang/Jasa (A/B)
+            'C' => NumberFormat::FORMAT_TEXT,                 // 3. Kode Barang Jasa
+            'D' => NumberFormat::FORMAT_TEXT,                 // 4. Nama Barang/Jasa
+            'E' => NumberFormat::FORMAT_TEXT,                 // 5. Nama Satuan Ukur
+            'F' => '#,##0.00',                                // 6. Harga Satuan
+            'G' => NumberFormat::FORMAT_NUMBER,               // 7. Jumlah Barang Jasa
+            'H' => '#,##0.00',                                // 8. Total Diskon
+            'I' => '#,##0.00',                                // 9. DPP
+            'J' => '#,##0.00',                                // 10. DPP Nilai Lain
+            'K' => NumberFormat::FORMAT_NUMBER,               // 11. Tarif PPN
+            'L' => '#,##0.00',                                // 12. PPN
+            'M' => NumberFormat::FORMAT_NUMBER,               // 13. Tarif PPnBM
+            'N' => '#,##0.00',                                // 14. PPnBM
         ];
     }
 
