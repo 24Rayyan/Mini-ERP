@@ -64,7 +64,7 @@
                     <div class="col-md-3">
                         <label for="customer_select" class="form-label fw-semibold text-dark small">Pilih Customer <span class="text-danger">*</span></label>
                         <select name="customer_id" id="customer_select" class="form-select customer-select smooth-dropdown" data-placeholder="Pilih customer..." required>
-                            <option value="">-- Pilih Customer --</option>
+                            <option value=""></option>
                             @foreach($customers as $c)
                                 <option value="{{ $c->id }}" data-tax-code="{{ $c->default_tax_transaction_code ?? '040' }}" data-tax-id="{{ $c->tax_id_number }}" data-tax-type="{{ $c->tax_id_type ?? 'NPWP' }}" data-email="{{ $c->email }}" {{ old('customer_id') == $c->id ? 'selected' : '' }}>
                                     {{ $c->name }}
